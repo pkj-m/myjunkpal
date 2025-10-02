@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyJunkPal - Food Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.secondary:hover {
+            background: #545b62;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        button.danger:hover {
+            background: #c82333;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs button {
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .nav-tabs button.active {
+            background: #0056b3;
+        }
+
+        .user-info {
+            color: #555;
+            font-size: 14px;
+        }
+
+        #authSection {
+            display: block;
+        }
+
+        .auth-forms {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .search-bar {
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 32px;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍔 MyJunkPal</h1>
+            <div class="user-info">
+                <span id="userDisplay">Not logged in</span>
+            </div>
+        </header>
+
+        <!-- Auth Section -->
+        <div id="authSection" class="section active">
+            <h2>Authentication</h2>
+            <div class="auth-forms">
+                <div>
+                    <h3>Login</h3>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" placeholder="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="password">
+                    </div>
+                    <button onclick="login()">Login</button>
+                </div>
+                <div>
+                    <h3>Register</h3>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="registerName" placeholder="John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="registerEmail" placeholder="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="registerPassword" placeholder="password">
+                    </div>
+                    <button onclick="register()">Register</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App (hidden until logged in) -->
+        <div id="appSection" class="hidden">
+            <div class="nav-tabs">
+                <button onclick="showTab('dashboard')" class="tab-btn active">Dashboard</button>
+                <button onclick="showTab('foods')" class="tab-btn">Foods</button>
+                <button onclick="showTab('entries')" class="tab-btn">Entries</button>
+                <button onclick="showTab('goals')" class="tab-btn">Goals</button>
+                <button onclick="logout()" class="secondary">Logout</button>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="section active">
+                <h2>Today's Summary</h2>
+                <div class="form-group">
+                    <label>Select Date</label>
+                    <input type="date" id="summaryDate" onchange="loadDailySummary()">
+                </div>
+                <div class="stats-grid" id="dailyStats">
+                    <div class="stat-card">
+                        <h3 id="totalCalories">0</h3>
+                        <p>Calories</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalProtein">0g</h3>
+                        <p>Protein</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalCarbs">0g</h3>
+                        <p>Carbs</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalFats">0g</h3>
+                        <p>Fats</p>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <h3>Meals</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Meal Type</th>
+                                <th>Food</th>
+                                <th>Quantity</th>
+                                <th>Calories</th>
+                                <th>Protein</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dailyEntriesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Foods Tab -->
+            <div id="foodsTab" class="section">
+                <h2>Food Database</h2>
+                <div class="search-bar">
+                    <input type="text" id="foodSearch" placeholder="Search foods..." oninput="searchFoods()">
+                </div>
+                <button onclick="showAddFoodForm()">Add Custom Food</button>
+
+                <div id="addFoodForm" class="hidden" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h3>Add Custom Food</h3>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="foodName">
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <input type="text" id="foodCategory">
+                        </div>
+                        <div class="form-group">
+                            <label>Calories</label>
+                            <input type="number" id="foodCalories">
+                        </div>
+                        <div class="form-group">
+                            <label>Protein (g)</label>
+                            <input type="number" id="foodProtein">
+                        </div>
+                        <div class="form-group">
+                            <label>Carbs (g)</label>
+                            <input type="number" id="foodCarbs">
+                        </div>
+                        <div class="form-group">
+                            <label>Fats (g)</label>
+                            <input type="number" id="foodFats">
+                        </div>
+                        <div class="form-group">
+                            <label>Serving Size</label>
+                            <input type="number" id="foodServingSize">
+                        </div>
+                        <div class="form-group">
+                            <label>Serving Unit</label>
+                            <input type="text" id="foodServingUnit" placeholder="g, ml, cup">
+                        </div>
+                    </div>
+                    <button onclick="addFood()">Save Food</button>
+                    <button onclick="hideAddFoodForm()" class="secondary">Cancel</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Calories</th>
+                                <th>Protein</th>
+                                <th>Carbs</th>
+                                <th>Fats</th>
+                                <th>Serving</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="foodsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Entries Tab -->
+            <div id="entriesTab" class="section">
+                <h2>Food Entries</h2>
+                <button onclick="showAddEntryForm()">Log Food</button>
+
+                <div id="addEntryForm" class="hidden" style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h3>Log Food Entry</h3>
+                    <div class="form-group">
+                        <label>Select Food</label>
+                        <select id="entryFoodId"></select>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Quantity (servings)</label>
+                            <input type="number" step="0.1" id="entryQuantity" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Meal Type</label>
+                            <select id="entryMealType">
+                                <option value="breakfast">Breakfast</option>
+                                <option value="lunch">Lunch</option>
+                                <option value="dinner">Dinner</option>
+                                <option value="snack">Snack</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Date & Time</label>
+                        <input type="datetime-local" id="entryDateTime">
+                    </div>
+                    <button onclick="addEntry()">Log Entry</button>
+                    <button onclick="hideAddEntryForm()" class="secondary">Cancel</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Meal Type</th>
+                                <th>Food</th>
+                                <th>Quantity</th>
+                                <th>Calories</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entriesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Goals Tab -->
+            <div id="goalsTab" class="section">
+                <h2>Nutrition Goals</h2>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Daily Calorie Goal</label>
+                        <input type="number" id="goalCalories">
+                    </div>
+                    <div class="form-group">
+                        <label>Daily Protein Goal (g)</label>
+                        <input type="number" id="goalProtein">
+                    </div>
+                    <div class="form-group">
+                        <label>Daily Carbs Goal (g)</label>
+                        <input type="number" id="goalCarbs">
+                    </div>
+                    <div class="form-group">
+                        <label>Daily Fats Goal (g)</label>
+                        <input type="number" id="goalFats">
+                    </div>
+                </div>
+                <button onclick="updateGoals()">Save Goals</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

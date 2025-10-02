@@ -9,6 +9,7 @@ import (
 	"myjunkpal/storage"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -52,9 +53,17 @@ func main() {
 	r.HandleFunc("/api/nutrition/goals", middleware.RequireAuth(nutritionHandler.GetGoals)).Methods("GET")
 	r.HandleFunc("/api/nutrition/goals", middleware.RequireAuth(nutritionHandler.UpdateGoals)).Methods("PUT")
 
+	// Setup CORS
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+
 	// Start server
 	log.Println("Server starting on :8080")
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := http.ListenAndServe(":8080", corsHandler.Handler(r)); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
 }
